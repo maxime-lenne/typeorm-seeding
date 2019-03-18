@@ -92,7 +92,8 @@ export class EntityFactory<Entity, Settings> {
           try {
             entity[attribute] = await (subEntityFactory as any).make();
           } catch (e) {
-            throw new Error(`Could not make ${(subEntityFactory as any).name}`);
+            console.log('SubEntity without Factory (Point, json...)');
+            // throw new Error(`Could not make ${(subEntityFactory as any).name}`);
           }
         }
       }
