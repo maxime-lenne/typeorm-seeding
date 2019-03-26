@@ -99,6 +99,7 @@ class EntityFactory {
                     return yield em.save(entity);
                 }
                 catch (error) {
+                    console.log(error);
                     throw new Error('Could not save entity');
                 }
             }

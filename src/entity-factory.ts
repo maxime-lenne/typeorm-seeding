@@ -53,6 +53,7 @@ export class EntityFactory<Entity, Settings> {
         const entity = await this.make();
         return await em.save<Entity>(entity);
       } catch (error) {
+        console.log(error);
         throw new Error('Could not save entity');
       }
     } else {
