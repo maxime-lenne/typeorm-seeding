@@ -10,6 +10,7 @@
   "types": "dist/typeorm-seeding.d.ts",
   "scripts": {
     "build": "npm run clean && rollup -c",
+    "prepare": "npm run build",
     "watch": "rollup -cw",
     "clean": "rimraf dist"
   },
