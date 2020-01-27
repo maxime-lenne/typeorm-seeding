@@ -24,3 +24,4 @@ dist
 ### templates ###
 tmp
 old
+/.idea/
