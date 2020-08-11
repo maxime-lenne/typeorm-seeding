@@ -1,39 +1,7 @@
-import glob from 'glob';
-import * as path from 'path';
+import { SeederConstructor, Seeder } from './types'
 
-// -------------------------------------------------------------------------
-// Util functions
-// -------------------------------------------------------------------------
-
-const importFactories = (files: string[]) => files.forEach(require);
-
-const loadFiles =
-  (filePattern: string) =>
-    (pathToFolder: string) =>
-      (successFn: (files: string[]) => void) =>
-        (failedFn: (error: any) => void) => {
-          glob(path.join(pathToFolder, filePattern), (error: any, files: string[]) => error
-            ? failedFn(error)
-            : successFn(files));
-        };
-
-const loadFactoryFiles = loadFiles('**/*{.factory,Factory}{.js,.ts}');
-
-// -------------------------------------------------------------------------
-// Facade functions
-// -------------------------------------------------------------------------
-
-export const loadEntityFactories = (pathToFolder: string): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    loadFactoryFiles(pathToFolder)(files => {
-      importFactories(files);
-      resolve(files);
-    })(reject);
-  });
-};
-
-export const loadSeeds = (pathToFolder: string): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    loadFiles('**/*{.seed,Seed}{.js,.ts}')(pathToFolder)(resolve)(reject);
-  });
-};
+export const importSeed = async (filePath: string): Promise<SeederConstructor> => {
+  const seedFileObject: { [key: string]: SeederConstructor } = await import(filePath)
+  const keys = Object.keys(seedFileObject)
+  return seedFileObject[keys[0]]
+}

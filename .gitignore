@@ -1,8 +1,9 @@
 ### generated stuff ###
 lib
 es
-test/coverage
+coverage
 .rpt2_cache
+test.db
 
 ### node ###
 logs

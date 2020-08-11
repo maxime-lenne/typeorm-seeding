@@ -1,49 +1,71 @@
 {
   "name": "typeorm-seeding",
-  "version": "1.0.0-beta.6",
-  "description": "TypeORM seeding",
-  "main": "dist/typeorm-seeding.js",
-  "module": "dist/typeorm-seeding.es.js",
-  "files": [
-    "dist"
-  ],
-  "types": "dist/typeorm-seeding.d.ts",
-  "scripts": {
-    "build": "npm run clean && rollup -c",
-    "prepare": "npm run build",
-    "watch": "rollup -cw",
-    "clean": "rimraf dist"
-  },
+  "version": "1.6.0",
+  "description": "🌱 A delightful way to seed test data into your database.",
   "license": "MIT",
-  "author": "w3tec.ch <info@w3tec.ch>",
-  "contributors": [
-    {
-      "name": "Gery Hirschfeld",
-      "email": "gery.hirschfeld@w3tec.ch",
-      "url": "https://github.com/hirsch88"
-    }
-  ],
+  "author": "Gery Hirschfeld <gery.hirschfeld@w3tec.ch> (https://github.com/hirsch88)",
+  "main": "dist/typeorm-seeding.js",
+  "types": "dist/typeorm-seeding.d.ts",
+  "bin": {
+    "typeorm-seeding": "dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/w3tecch/typeorm-seeding.git"
+  },
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "build": "npm run prebuild && tsc --project ./tsconfig.build.json",
+    "watch": "rollup -cw",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "semantic-release": "semantic-release",
+    "schema:drop": "ts-node ./node_modules/typeorm/cli.js schema:drop -c sample",
+    "schema:sync": "ts-node ./node_modules/typeorm/cli.js schema:sync -c sample",
+    "schema:log": "ts-node ./node_modules/typeorm/cli.js schema:log -c sample",
+    "seed:run": "ts-node ./dist/cli.js seed -c sample",
+    "seed:config": "ts-node ./dist/cli.js config -c sample"
+  },
   "devDependencies": {
-    "@types/faker": "^4.1.4",
-    "rimraf": "^2.6.2",
-    "rollup": "^0.66.2",
-    "rollup-plugin-cli": "^0.1.5",
-    "rollup-plugin-commonjs": "^9.1.8",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^3.4.0",
-    "rollup-plugin-typescript2": "^0.17.0",
-    "tslint": "^5.11.0",
-    "typescript": "^3.0.3"
+    "@semantic-release/git": "^9.0.0",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/chalk": "^2.2.0",
+    "@types/faker": "^4.1.11",
+    "@types/glob": "7.1.1",
+    "@types/jest": "^25.2.1",
+    "@types/node": "13.11.1",
+    "@types/yargs": "^15.0.4",
+    "@typescript-eslint/eslint-plugin": "^2.27.0",
+    "@typescript-eslint/parser": "^2.27.0",
+    "bcryptjs": "^2.4.3",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-import": "^2.20.2",
+    "jest": "^25.3.0",
+    "prettier": "^2.0.4",
+    "rimraf": "^3.0.2",
+    "semantic-release": "^17.0.4",
+    "sqlite": "^4.0.6",
+    "sqlite3": "^4.1.1",
+    "ts-jest": "^25.3.1",
+    "typeorm": "^0.2.24",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@types/node": "^10.11.0",
-    "chalk": "^2.4.1",
-    "commander": "^2.18.0",
-    "faker": "^4.1.0",
-    "glob": "^7.1.3",
-    "reflect-metadata": "^0.1.12",
-    "typeorm": "0.2.22"
+    "chalk": "^4.0.0",
+    "faker": "4.1.0",
+    "glob": "7.1.6",
+    "ora": "4.0.3",
+    "reflect-metadata": "0.1.13",
+    "yargs": "15.3.1"
   },
-  "peerDependencies": {}
+  "peerDependencies": {
+    "typeorm": "^0.2.24"
+  },
+  "resolutions": {
+    "mem": ">=4.0.0"
+  }
 }

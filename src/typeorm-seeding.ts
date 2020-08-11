@@ -1,67 +1,73 @@
-import 'reflect-metadata';
-import { Connection, ObjectType } from 'typeorm';
+import 'reflect-metadata'
+import { ObjectType, getConnection, Connection } from 'typeorm'
 
-import { EntityFactory } from './entity-factory';
-import { EntityFactoryDefinition, Factory, FactoryFunction, SeedConstructor } from './types';
-import { getNameOfClass } from './utils';
+import { EntityFactory } from './entity-factory'
+import { EntityFactoryDefinition, Factory, FactoryFunction, SeederConstructor, Seeder } from './types'
+import { getNameOfEntity } from './utils/factory.util'
+import { loadFiles, importFiles } from './utils/file.util'
+import { ConfigureOption, configureConnection, getConnectionOptions, createConnection } from './connection'
 
 // -------------------------------------------------------------------------
 // Handy Exports
 // -------------------------------------------------------------------------
 
-export * from './importer';
-export * from './connection';
-export { Factory, Seed } from './types';
-export { times } from './utils';
+export * from './importer'
+export * from './connection'
+export { Factory, Seeder } from './types'
+export { times } from './helpers'
 
 // -------------------------------------------------------------------------
 // Types & Variables
 // -------------------------------------------------------------------------
-
-(global as any).seeder = {
-  connection: undefined,
+;(global as any).seeder = {
   entityFactories: new Map<string, EntityFactoryDefinition<any, any>>(),
-};
+}
 
 // -------------------------------------------------------------------------
 // Facade functions
 // -------------------------------------------------------------------------
 
-/**
- * Adds the typorm connection to the seed options
- */
-export const setConnection = (connection: Connection) => (global as any).seeder.connection = connection;
-
-/**
- * Returns the typorm connection from our seed options
- */
-export const getConnection = () => (global as any).seeder.connection;
-
-/**
- * Defines a new entity factory
- */
-export const define = <Entity, Settings>(entity: ObjectType<Entity>, factoryFn: FactoryFunction<Entity, Settings>) => {
-  (global as any).seeder.entityFactories.set(getNameOfClass(entity), { entity, factory: factoryFn });
-};
-
-/**
- * Gets a defined entity factory and pass the settigns along to the entity factory function
- */
-export const factory: Factory = <Entity, Settings>(entity: ObjectType<Entity>) => (settings?: Settings) => {
-  const name = getNameOfClass(entity);
-  const entityFactoryObject = (global as any).seeder.entityFactories.get(name);
-  return new EntityFactory<Entity, Settings>(
-    name,
+export const define = <Entity, Context>(entity: ObjectType<Entity>, factoryFn: FactoryFunction<Entity, Context>) => {
+  ;(global as any).seeder.entityFactories.set(getNameOfEntity(entity), {
     entity,
-    entityFactoryObject.factory,
-    settings
-  );
-};
+    factory: factoryFn,
+  })
+}
 
-/**
- * Runs a seed class
- */
-export const runSeed = async <T>(seederConstructor: SeedConstructor): Promise<T> => {
-  const seeder = new seederConstructor();
-  return seeder.seed(factory, getConnection());
-};
+export const factory: Factory = <Entity, Context>(entity: ObjectType<Entity>) => (context?: Context) => {
+  const name = getNameOfEntity(entity)
+  const entityFactoryObject = (global as any).seeder.entityFactories.get(name)
+  return new EntityFactory<Entity, Context>(name, entity, entityFactoryObject.factory, context)
+}
+
+export const runSeeder = async (clazz: SeederConstructor): Promise<any> => {
+  const seeder: Seeder = new clazz()
+  const connection = await createConnection()
+  return seeder.run(factory, connection)
+}
+
+// -------------------------------------------------------------------------
+// Facade functions for testing
+// -------------------------------------------------------------------------
+export const useRefreshDatabase = async (options: ConfigureOption = {}): Promise<Connection> => {
+  configureConnection(options)
+  const option = await getConnectionOptions()
+  const connection = await createConnection(option)
+  if (connection && connection.isConnected) {
+    await connection.dropDatabase()
+    await connection.synchronize()
+  }
+  return connection
+}
+
+export const tearDownDatabase = async (): Promise<void> => {
+  const connection = await createConnection()
+  return connection && connection.isConnected ? connection.close() : undefined
+}
+
+export const useSeeding = async (options: ConfigureOption = {}): Promise<void> => {
+  configureConnection(options)
+  const option = await getConnectionOptions()
+  const factoryFiles = loadFiles(option.factories)
+  await importFiles(factoryFiles)
+}
